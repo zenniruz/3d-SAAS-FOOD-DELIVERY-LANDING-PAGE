@@ -5,16 +5,13 @@ import * as THREE from 'three'
 import { useAppStore, prefersReducedMotion } from '../../store/useAppStore'
 
 const RADIUS = 18
-const BEAM_ANGLE = THREE.MathUtils.degToRad(26)
-const BASE_SPEED = 0.5 // rad/sec
-const SCROLL_SPEED_BOOST = 1.2 // additional rad/sec at full scroll
+const BEAM_ANGLE = THREE.MathUtils.degToRad(28)
+const BASE_SPEED = 0.42 // rad/sec — slightly slower for a calmer feel
+const SCROLL_SPEED_BOOST = 0.9
 
-// Builds a flat pie-slice wedge directly in the XZ ground plane using the
-// same (x = r*cos, z = r*sin) convention as the restaurant node positions,
-// so the sweep angle and restaurant angles line up without any conversion.
 function useSweepGeometry() {
   return useMemo(() => {
-    const segments = 32
+    const segments = 40
     const positions = [0, 0, 0]
     for (let i = 0; i <= segments; i++) {
       const t = (i / segments) * BEAM_ANGLE
@@ -41,9 +38,6 @@ export default function RadarSweep() {
 
   useFrame((state, delta) => {
     if (prefersReducedMotion) {
-      // Avoid an autonomous, ever-spinning animation: tie the sweep directly
-      // to scroll position instead so motion only happens in response to
-      // the user's own input.
       angleRef.current = scroll.offset * Math.PI * 6
     } else {
       const speed = BASE_SPEED + scroll.offset * SCROLL_SPEED_BOOST
@@ -52,9 +46,6 @@ export default function RadarSweep() {
     angleRef.current = ((angleRef.current % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)
 
     if (meshRef.current) {
-      // Three.js rotation.y is inverted relative to our (cos, sin) angle
-      // convention, so negate here to keep the visible beam and the
-      // published sweepAngle pointing at the same world direction.
       meshRef.current.rotation.y = -angleRef.current
     }
 
@@ -62,14 +53,18 @@ export default function RadarSweep() {
   })
 
   return (
-    <mesh ref={meshRef} geometry={geometry}>
-      <meshBasicMaterial
-        color="#22ff88"
-        transparent
-        opacity={0.28}
-        side={THREE.DoubleSide}
-        depthWrite={false}
-      />
-    </mesh>
+    // Two layered meshes: a dim base + a brighter thin leading edge
+    <group>
+      {/* Main beam — subtle, translucent */}
+      <mesh ref={meshRef} geometry={geometry}>
+        <meshBasicMaterial
+          color="#22c55e"
+          transparent
+          opacity={0.10}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+    </group>
   )
 }

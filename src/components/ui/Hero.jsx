@@ -1,15 +1,12 @@
 import { useAppStore } from '../../store/useAppStore'
 
 export default function Hero() {
-  // Read the scroll container from the store rather than calling drei's
-  // useScroll() directly — Hero is also rendered in the no-WebGL fallback
-  // page, outside any <ScrollControls> context, so it must stay safe there.
   const scrollEl = useAppStore((state) => state.scrollEl)
 
   const handleExplore = () => {
     if (scrollEl) {
       scrollEl.scrollTo({
-        top: scrollEl.scrollHeight * 0.35,
+        top: scrollEl.scrollHeight * 0.32,
         behavior: 'smooth',
       })
     }
@@ -18,14 +15,24 @@ export default function Hero() {
   return (
     <section className="hero-section">
       <div className="hero-content">
-        <span className="hero-eyebrow">Live Radar</span>
-        <h1 className="hero-title">Discover Food Around You</h1>
+        <span className="hero-eyebrow">
+          <span className="hero-eyebrow-dot" />
+          Live Radar
+        </span>
+        <h1 className="hero-title">
+          Discover Food<br />
+          <em>Around You</em>
+        </h1>
         <p className="hero-subtext">
-          Real-time restaurant discovery powered by live data
+          Real-time restaurant discovery powered by live data.
+          Scroll to sweep the radar.
         </p>
-        <button className="hero-cta" onClick={handleExplore}>
-          Start Scanning
-        </button>
+        <div className="hero-actions">
+          <button className="hero-cta" onClick={handleExplore}>
+            Start Scanning
+          </button>
+          <span className="hero-cta-hint">↓ scroll to reveal</span>
+        </div>
       </div>
       <div className="hero-scroll-hint">Scroll to sweep the radar ↓</div>
     </section>

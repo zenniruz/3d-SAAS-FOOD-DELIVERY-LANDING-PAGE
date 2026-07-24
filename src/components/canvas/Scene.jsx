@@ -8,8 +8,6 @@ import RadarSweep from './RadarSweep'
 import PulseRing from './PulseRing'
 import RestaurantNodes from './RestaurantNodes'
 
-// Lives inside <ScrollControls> so it can read the scroll context and mirror
-// what it needs into the global store for components outside the Canvas.
 function ScrollSync() {
   useScrollProgress()
   const scroll = useScroll()
@@ -24,9 +22,15 @@ function ScrollSync() {
 
 export default function Scene({ children }) {
   return (
-    <ScrollControls pages={5} damping={0.25}>
+    // 8 pages gives enough room: radar intro + scroll interaction + discovery + content sections
+    <ScrollControls pages={8} damping={0.22}>
       <ScrollSync />
-      <fog attach="fog" args={['#03050a', 10, 34]} />
+      <fog attach="fog" args={['#0b0f0e', 12, 38]} />
+
+      {/* Terrain lighting — very dim atmospheric */}
+      <ambientLight intensity={0.55} color="#1a2620" />
+      <pointLight position={[0, 10, 0]} intensity={1.4} color="#f97316" distance={28} decay={2} />
+      <pointLight position={[-8, 4, -8]} intensity={0.4} color="#22c55e" distance={20} decay={2} />
 
       <CameraRig />
       <RadarGrid />
