@@ -7,6 +7,10 @@ import RestaurantCard from './components/ui/RestaurantCard'
 import StickyCTA from './components/ui/StickyCTA'
 import { useAppStore } from './store/useAppStore'
 import { restaurants } from './data/restaurants'
+import {
+  IconPin, IconBowl, IconTruck,
+  IconBolt, IconRadar, IconSliders, IconShield,
+} from './components/ui/Icons'
 
 function isWebGLAvailable() {
   try {
@@ -20,64 +24,69 @@ function isWebGLAvailable() {
   }
 }
 
-function DiscoverySection({ forceShowAll = false }) {
-  const revealedRestaurants = useAppStore((state) => state.revealedRestaurants)
-  const activeCategory = useAppStore((state) => state.activeCategory)
+/* ── Cbites fixed brand bar ────────────────────────────── */
+function CbitesNav() {
+  return (
+    <div className="cbites-nav" aria-label="cbites brand">
+      <span className="cbites-logo">cbites</span>
+      <span className="cbites-tagline">delivers as he dey hot</span>
+    </div>
+  )
+}
 
-  const visible = useMemo(() => {
-    return restaurants.filter((r) => {
-      const isRevealed = forceShowAll || revealedRestaurants.includes(r.id)
-      const matchesCategory = activeCategory === 'all' || r.category === activeCategory
-      return isRevealed && matchesCategory
-    })
-  }, [revealedRestaurants, activeCategory, forceShowAll])
+/* ── Discovery ─────────────────────────────────────────── */
+function DiscoverySection({ forceShowAll = false }) {
+  const revealedRestaurants = useAppStore((s) => s.revealedRestaurants)
+  const activeCategory = useAppStore((s) => s.activeCategory)
+
+  const visible = useMemo(() => restaurants.filter((r) => {
+    const isRevealed = forceShowAll || revealedRestaurants.includes(r.id)
+    const matchesCategory = activeCategory === 'all' || r.category === activeCategory
+    return isRevealed && matchesCategory
+  }), [revealedRestaurants, activeCategory, forceShowAll])
 
   return (
     <section className="discovery-section" id="discovery">
       <div className="discovery-header">
         <span className="section-eyebrow">Radar Feed</span>
-        <h2>Nearby, revealed by radar</h2>
-        <p>
-          <strong>{visible.length}</strong> of {restaurants.length} spots detected
-        </p>
+        <h2>Restaurants near you</h2>
+        <p><strong>{visible.length}</strong> of {restaurants.length} spots detected</p>
       </div>
 
       {visible.length === 0 ? (
         <div className="discovery-empty">
-          <div className="discovery-empty-icon">📡</div>
-          <p>Sweep the radar above to reveal restaurants near you.</p>
-          <span>Keep scrolling to spin the beam</span>
+          <div className="discovery-empty-icon">
+            <IconRadar />
+          </div>
+          <p>Scroll to spin the radar and reveal restaurants near you.</p>
+          <span>Keep scrolling to sweep the beam</span>
         </div>
       ) : (
         <div className="discovery-grid">
-          {visible.map((r) => (
-            <RestaurantCard key={r.id} restaurant={r} />
-          ))}
+          {visible.map((r) => <RestaurantCard key={r.id} restaurant={r} />)}
         </div>
       )}
     </section>
   )
 }
 
+/* ── How It Works ──────────────────────────────────────── */
 function HowItWorksSection() {
   const steps = [
     {
-      number: '01',
-      icon: '📡',
-      title: 'Open the Radar',
-      desc: 'Launch the live radar and see your neighbourhood lit up in real time. Every dot is a verified, open restaurant within reach.',
+      n: '01', Icon: IconPin,
+      title: 'Set your location',
+      desc: 'Allow location access or type your address. The radar locks onto your area and shows every open restaurant within reach in real time.',
     },
     {
-      number: '02',
-      icon: '🔍',
-      title: 'Sweep & Discover',
-      desc: 'Scroll to spin the beam. As it sweeps past each location, the restaurant surfaces with its name, rating, and distance.',
+      n: '02', Icon: IconBowl,
+      title: 'Pick your dishes',
+      desc: 'Browse nearby spots as the radar sweeps them into view. Filter by cuisine, check live ratings, and add your favourites to your order.',
     },
     {
-      number: '03',
-      icon: '🚀',
-      title: 'Order in Seconds',
-      desc: 'Tap any revealed spot to see the full menu, check live wait times, and place your order — all without leaving the app.',
+      n: '03', Icon: IconTruck,
+      title: 'Pay & get it delivered',
+      desc: 'Check out in seconds with your saved payment method. Your food is confirmed instantly and delivered to your door — still hot.',
     },
   ]
 
@@ -85,20 +94,14 @@ function HowItWorksSection() {
     <section className="how-section">
       <div className="how-inner">
         <span className="section-eyebrow">How it works</span>
-        <h2 className="how-title">
-          Three steps to<br />
-          <em>your next meal</em>
-        </h2>
+        <h2 className="how-title">Order in three<br /><em>simple steps</em></h2>
         <div className="how-steps">
-          {steps.map((step, i) => (
-            <div
-              key={step.number}
-              className={`how-step how-step--${i % 2 === 0 ? 'left' : 'right'}`}
-            >
-              <div className="how-step-number">{step.number}</div>
-              <div className="how-step-icon">{step.icon}</div>
-              <h3 className="how-step-title">{step.title}</h3>
-              <p className="how-step-desc">{step.desc}</p>
+          {steps.map(({ n, Icon, title, desc }) => (
+            <div key={n} className="how-step">
+              <div className="how-step-number">{n}</div>
+              <div className="how-step-icon"><Icon /></div>
+              <h3 className="how-step-title">{title}</h3>
+              <p className="how-step-desc">{desc}</p>
             </div>
           ))}
         </div>
@@ -107,50 +110,30 @@ function HowItWorksSection() {
   )
 }
 
+/* ── Features ──────────────────────────────────────────── */
 function FeaturesSection() {
   const features = [
-    {
-      icon: '⚡',
-      title: 'Live data',
-      desc: 'Restaurant availability updates every 30 seconds. No stale listings.',
-    },
-    {
-      icon: '📍',
-      title: 'Hyper-local',
-      desc: 'Radius from 0.5 km to 10 km. Zoom the radar to what matters to you.',
-    },
-    {
-      icon: '🎯',
-      title: 'Smart filters',
-      desc: 'Filter by cuisine, dietary needs, or price — instantly re-sweeps the map.',
-    },
-    {
-      icon: '🔒',
-      title: 'Privacy first',
-      desc: 'Location is processed on-device. We never store your GPS coordinates.',
-    },
+    { Icon: IconBolt,    title: 'Live data',      desc: 'Restaurant availability refreshes every 30 seconds. No stale listings, no false "open" signs.' },
+    { Icon: IconRadar,   title: 'Hyper-local',    desc: 'Set your radius from 0.5 km to 10 km. The radar re-sweeps instantly whenever you adjust it.' },
+    { Icon: IconSliders, title: 'Smart filters',  desc: 'Filter by cuisine, price range, or dietary needs. Results update live without reloading.' },
+    { Icon: IconShield,  title: 'Privacy first',  desc: 'Your location is processed on-device. We never store GPS data or sell your info to third parties.' },
   ]
 
   return (
     <section className="features-section">
       <div className="features-inner">
-        <span className="section-eyebrow from-left">Platform</span>
-        <h2 className="features-title from-right">
-          Built different.<br />Feels instant.
-        </h2>
-        <p className="features-lead from-left">
-          Most food apps show you a static list. We built a spatial radar so you
-          can <em>see</em> what's around you, not just read about it.
+        <span className="section-eyebrow">Platform</span>
+        <h2 className="features-title">Built different.<br /><em>Feels instant.</em></h2>
+        <p className="features-lead">
+          Most delivery apps show a static list. cbites built a live spatial radar
+          so you can <em>see</em> what's around you — not just scroll through a catalogue.
         </p>
         <div className="features-grid">
-          {features.map((f, i) => (
-            <div
-              key={f.title}
-              className={`feature-card feature-card--${i % 2 === 0 ? 'from-left' : 'from-right'}`}
-            >
-              <span className="feature-icon">{f.icon}</span>
-              <h3 className="feature-title">{f.title}</h3>
-              <p className="feature-desc">{f.desc}</p>
+          {features.map(({ Icon, title, desc }) => (
+            <div key={title} className="feature-card">
+              <span className="feature-icon"><Icon /></span>
+              <h3 className="feature-title">{title}</h3>
+              <p className="feature-desc">{desc}</p>
             </div>
           ))}
         </div>
@@ -159,14 +142,14 @@ function FeaturesSection() {
   )
 }
 
+/* ── Stats strip ───────────────────────────────────────── */
 function StatsSection() {
   const stats = [
-    { value: '12 K+', label: 'Restaurants listed' },
-    { value: '4.8★', label: 'Average rating' },
-    { value: '< 2 min', label: 'Order to confirmed' },
-    { value: '38 cities', label: 'Active markets' },
+    { value: '12 K+',   label: 'Restaurants' },
+    { value: '4.8 ★',   label: 'Avg rating' },
+    { value: '< 2 min', label: 'To confirm' },
+    { value: '38',      label: 'Cities' },
   ]
-
   return (
     <section className="stats-section">
       {stats.map((s) => (
@@ -179,25 +162,21 @@ function StatsSection() {
   )
 }
 
+/* ── Footer / About ────────────────────────────────────── */
 function AboutSection() {
   return (
     <footer className="about-section" id="about">
       <div className="about-inner">
         <div className="about-brand">
-          <span className="about-logo">●&nbsp;RADAR</span>
-          <p className="about-tagline">
-            The spatial food discovery platform.<br />
-            Built for cities that never stop.
-          </p>
+          <span className="about-logo">cbites</span>
+          <p className="about-tagline">The spatial food discovery platform.<br />Built for cities that never stop.</p>
           <p className="about-body">
-            We started Radar because search bars are the wrong interface for hunger.
-            You don't know what you want until you see what's around you. So we
-            built a live, scrollable radar that surfaces real restaurants in real time
-            — no ads, no sponsored placements, just the closest great food to wherever
-            you are right now.
+            We started cbites because search bars are the wrong interface for hunger.
+            You don't know what you want until you see what's around you. So we built
+            a live radar that surfaces real restaurants in real time — no sponsored
+            placements, no dark patterns. Just the closest great food, delivered hot.
           </p>
         </div>
-
         <div className="about-links">
           <div className="about-col">
             <h4>Product</h4>
@@ -221,23 +200,22 @@ function AboutSection() {
           </div>
         </div>
       </div>
-
       <div className="about-bar">
-        <span>© 2025 Radar Technologies Inc.</span>
-        <span className="about-bar-right">
-          Made with <span style={{ color: 'var(--accent)' }}>●</span> and good taste
-        </span>
+        <span>© 2025 cbites Technologies</span>
+        <span className="about-tagline-footer">delivers as he dey hot 🔥</span>
       </div>
     </footer>
   )
 }
 
+/* ── Root ──────────────────────────────────────────────── */
 export default function App() {
   const [webglOK] = useState(() => isWebGLAvailable())
 
   if (!webglOK) {
     return (
       <div className="fallback-page">
+        <CbitesNav />
         <Hero />
         <HowItWorksSection />
         <CategoryPills />
@@ -245,16 +223,16 @@ export default function App() {
         <FeaturesSection />
         <StatsSection />
         <AboutSection />
-        <div className="fallback-note">
-          <p>Your browser doesn&apos;t support 3D rendering — simplified view shown.</p>
-        </div>
       </div>
     )
   }
 
   return (
     <div className="app-root">
-      {/* Vignette overlay — darkens edges without touching the canvas */}
+      {/* Fixed cbites brand — sits above everything */}
+      <CbitesNav />
+
+      {/* Radial vignette to focus eye on radar centre */}
       <div className="vignette" aria-hidden="true" />
 
       <Canvas
@@ -264,18 +242,18 @@ export default function App() {
         camera={{ position: [0, 8, 6], fov: 50, near: 0.1, far: 100 }}
       >
         <color attach="background" args={['#0b0f0e']} />
-        <Suspense fallback={null}>
-          <Scene>
-            <Hero />
-            <HowItWorksSection />
-            <CategoryPills />
-            <DiscoverySection />
-            <FeaturesSection />
-            <StatsSection />
-            <AboutSection />
-          </Scene>
-        </Suspense>
+        {/* No Suspense wrapper — scene has no async assets; avoid hidden first-frame delay */}
+        <Scene>
+          <Hero />
+          <HowItWorksSection />
+          <CategoryPills />
+          <DiscoverySection />
+          <FeaturesSection />
+          <StatsSection />
+          <AboutSection />
+        </Scene>
       </Canvas>
+
       <StickyCTA />
     </div>
   )
